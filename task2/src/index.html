@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Todo List Demo</title>
+  <style> #lazy-section { margin-top: 1000px; } </style> <!-- For scrolling -->
+</head>
+<body>
+  <h1>Todo List</h1>
+  <button id="advanced-btn">Export to JSON (Interaction)</button>
+  <div id="lazy-section">Scroll here for Stats (Visibility)</div>
+
+  <script type="module">
+    // Static imports for core app
+    import { initApp } from './modules/app.mjs';
+
+    const todoList = initApp();
+
+    // Import on Interaction
+    const advancedBtn = document.getElementById('advanced-btn');
+    advancedBtn.addEventListener('click', async () => {
+      try {
+        const { exportToJSON } = await import('./modules/advanced_feature.mjs');
+        const json = exportToJSON(todoList.getTodos());
+        console.log(json);
+      } catch (error) {
+        console.error('Failed to load advanced feature:', error);
+        // Fallback
+        alert('Export failed. Try again.');
+      }
+    });
+
+    // Import on Visibility
+    const lazySection = document.getElementById('lazy-section');
+    const observer = new IntersectionObserver(async (entries) => {
+      if (entries[0].isIntersecting) {
+        try {
+          const { getStats } = await import('./modules/lazy_component.mjs');
+          getStats(todoList.getTodos());
+        } catch (error) {
+          console.error('Failed to load lazy component:', error);
+          // Fallback
+          console.log('Stats unavailable.');
+        }
+        observer.disconnect();
+      }
+    });
+    observer.observe(lazySection);
+  </script>
+</body>
+</html>
